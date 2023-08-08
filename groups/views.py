@@ -8,11 +8,19 @@ from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from . import models
 from groups.models import Group, GroupMember
+from django.urls import reverse_lazy
+from braces.views import SelectRelatedMixin
 
 
 class CreateGroup(LoginRequiredMixin, generic.CreateView):
     fields = ('name', 'description')
     model = Group
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.creator = self.request.user
+        self.object.save()
+        return super().form_valid(form)
 
 
 class SingleGroup  (generic.DetailView):
@@ -60,3 +68,17 @@ class LeaveGroup(LoginRequiredMixin, generic.RedirectView):
             messages.success(self.request,'You have left the group!')
         return super().get(request, *args, **kwargs)
 
+
+class DeleteGroup(LoginRequiredMixin, SelectRelatedMixin, generic.DeleteView):
+
+    model = models.Group
+    select_related = ['creator']
+    success_url = reverse_lazy('groups:all')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(creator=self.request.user)
+
+    def delete(self, *args, **kwargs):
+        messages.success(self.request, 'Group Deleted')
+        return super().delete(*args, **kwargs)

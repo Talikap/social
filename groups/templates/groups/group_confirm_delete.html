@@ -1,0 +1,34 @@
+{% extends "groups/group_base.html" %}
+
+{% block group_content %}
+    <h3>Are you sure you want to delete this group?</h3>
+
+    <p></p>
+
+    <div class="col-md-8">
+        <div class="list-group">
+
+            <a class="list-group-item list-group-item-action flex-column align-items-start"
+               href="{% url 'groups:single' slug=group.slug %}">
+                <h3 class="mb-1">{{ group.name }}</h3>
+                <p class="mb-1">{{ group.description_html|safe }}</p>
+                <div class="d-flex w-40 justify-content-between">
+                    <small class="text-muted"><span class="badge bg-secondary">
+                        {{ group.members.count }}</span> member{{ group.members.count|pluralize }}</small>
+                    <small class="text-muted"><span class="badge bg-secondary">
+                        {{ group.posts.count }}</span> post{{ group.posts.count|pluralize }}</small>
+                    <span></span><span></span>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <p></p>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" value="Confirm Delete" class="btn btn-danger btn-large">
+        <a href="{% url 'groups:all' %}" class="btn btn-light btn-large">Cancel</a>
+    </form>
+{% endblock %}
